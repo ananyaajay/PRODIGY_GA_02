@@ -2,7 +2,7 @@
 
 # IMAGE GENERATION WITH PRE-TRAINED MODELS 🤖
 
-Pre-trained generative models like DALL-E-mini or Stable Diffusion to create images from text prompts. This code generates an image from a text prompt using the Stable Diffusion model via Hugging Face’s Diffusers library. It automatically selects GPU or CPU for processing, loads a pre-trained model, creates art based on a prompt, and saves the result as an image file. 
+This is a tool that utilizes pre-trained generative models like DALL-E-mini or Stable Diffusion to create images from text prompts. This code generates an image from a text prompt using the Stable Diffusion model via Hugging Face’s Diffusers library. It automatically selects GPU or CPU for processing, loads a pre-trained model, creates art based on a prompt, and saves the result as an image file. 
 
 ## ✓ Features: 
 
