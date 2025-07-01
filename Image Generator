@@ -1,0 +1,28 @@
+import StableDiffusionPipeline
+import torch
+import sys
+
+def main():
+    # Allow prompt via command line or use default
+    if len(sys.argv) > 1:
+        prompt = " ".join(sys.argv[1:])
+    else:
+        prompt = "A vibrant futuristic cityscape at sunset, digital art"
+
+    pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    pipe = pipe.to(device)
+
+    if device == "cuda":
+        with torch.autocast("cuda"):
+            result = pipe(prompt)
+    else:
+        result = pipe(prompt)
+
+    image = result.images[0]
+    image.save("output.png")
+    print("Image saved to output.png")
+
+if __name__ == "__main__":
+    main()
