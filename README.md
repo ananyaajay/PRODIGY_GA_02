@@ -6,13 +6,17 @@ Pre-trained generative models like DALL-E-mini or Stable Diffusion to create ima
 
 ## ✓ Features: 
 • Text-to-image generation Automatic device selection (GPU/CPU) 
+
 • Model loading from Hugging Face Image saving capability
 
 ## ✓ Concepts Used: 
 • Deep learning (text-to-image diffusion models) 
+
 • PyTorch device handling Model inference File I/O 
 
 ## ✓ Highlights: 
 • Simplicity and clarity 
+
 • Flexible hardware support 
+
 • Extensible for custom prompts or models
