@@ -70,3 +70,13 @@ img = generate("vertical line")
 plt.imshow(img.numpy(), cmap='gray')
 plt.title("Generated: vertical line")
 plt.show()
+
+from diffusers import StableDiffusionPipeline
+import torch
+
+pipe = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4")
+pipe = pipe.to("cuda")  # or "cpu"
+
+prompt = "a photo of an astronaut riding a horse"
+image = pipe(prompt).images[0]
+image.show()
