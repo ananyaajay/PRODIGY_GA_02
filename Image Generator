@@ -1,28 +1,72 @@
-import StableDiffusionPipeline
 import torch
-import sys
+import torch.nn as nn
+import torch.optim as optim
 
-def main():
-    # Allow prompt via command line or use default
-    if len(sys.argv) > 1:
-        prompt = " ".join(sys.argv[1:])
-    else:
-        prompt = "A vibrant futuristic cityscape at sunset, digital art"
+data = [
+    ("black square", torch.zeros(1, 8, 8)),                
+    ("white square", torch.ones(1, 8, 8)),                 
+    ("center dot", torch.zeros(1, 8, 8).fill_(0.0)),       
+    ("vertical line", torch.zeros(1, 8, 8)),               
+    ("horizontal line", torch.zeros(1, 8, 8)),             
+]
 
-    pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+data[2][1][0,4,4] = 1.0
+data[3][1][0,:,4] = 1.0
+data[4][1][0,4,:] = 1.0
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    pipe = pipe.to(device)
+vocab = {t:i for i,(t,_) in enumerate(data)}
 
-    if device == "cuda":
-        with torch.autocast("cuda"):
-            result = pipe(prompt)
-    else:
-        result = pipe(prompt)
+class TextEncoder(nn.Module):
+    def __init__(self, vocab_size, emb_dim):
+        super().__init__()
+        self.emb = nn.Embedding(vocab_size, emb_dim)
+    def forward(self, idx):
+        return self.emb(idx)
 
-    image = result.images[0]
-    image.save("output.png")
-    print("Image saved to output.png")
+class ImageGenerator(nn.Module):
+    def __init__(self, emb_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(emb_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 8*8),
+            nn.Sigmoid()
+        )
+    def forward(self, emb):
+        img = self.net(emb)
+        return img.view(-1, 1, 8, 8)
 
-if __name__ == "__main__":
-    main()
+inputs = torch.tensor([vocab[t] for t,_ in data])
+targets = torch.stack([img for _,img in data])
+
+emb_dim = 16
+text_encoder = TextEncoder(len(vocab), emb_dim)
+image_gen = ImageGenerator(emb_dim)
+params = list(text_encoder.parameters()) + list(image_gen.parameters())
+optimizer = optim.Adam(params, lr=0.01)
+loss_fn = nn.MSELoss()
+
+for epoch in range(2000):
+    optimizer.zero_grad()
+    text_emb = text_encoder(inputs)
+    imgs_pred = image_gen(text_emb)
+    loss = loss_fn(imgs_pred, targets)
+    loss.backward()
+    optimizer.step()
+    if epoch % 200 == 0:
+        print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
+
+def generate(prompt):
+    idx = torch.tensor([vocab[prompt]])
+    with torch.no_grad():
+        emb = text_encoder(idx)
+        img = image_gen(emb)
+    return img[0,0]
+
+import matplotlib.pyplot as plt
+img = generate("vertical line")
+plt.imshow(img.numpy(), cmap='gray')
+plt.title("Generated: vertical line")
+plt.show()
