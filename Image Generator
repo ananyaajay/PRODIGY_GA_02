@@ -1,12 +1,13 @@
 from diffusers import StableDiffusionPipeline
-import torch
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+pipe = pipe.to("cuda")  # Use "cpu" if you don't have a GPU
 
-pipe = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4")
-pipe = pipe.to(device)
+prompt = "A vibrant futuristic cityscape at sunset, digital art"
 
-prompt = "a cute cat reading a book"
+result = pipe(prompt)
+image = result.images[0]
 
-result = pipe(prompt).images[0]
-result.show()
+image.save("output.png")
+
+print("Image saved to output.png")
