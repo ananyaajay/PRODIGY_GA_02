@@ -2,10 +2,11 @@ from diffusers import StableDiffusionPipeline
 import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
 pipe = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4")
 pipe = pipe.to(device)
+
 prompt = "a cute cat reading a book"
 
 result = pipe(prompt).images[0]
-
-result.show() 
+result.show()
